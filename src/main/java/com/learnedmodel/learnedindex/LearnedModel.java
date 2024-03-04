@@ -8,17 +8,17 @@ package com.learnedmodel.learnedindex;
 */
 public class LearnedModel {
     // Member variables to store the key and the cumulative distribution function (CDF) value
-    private int key;
+    private double key;
     private double cdfKey;
 
     // Constructor to initialize the key and CDF value
-    public LearnedModel(int key, double cdfKey) {
+    public LearnedModel(double key, double cdfKey) {
         this.key = key;
         this.cdfKey = cdfKey;
     }
 
     // Getter method to retrieve the key
-    public int getKey() {
+    public double getKey() {
         return key;
     }
 

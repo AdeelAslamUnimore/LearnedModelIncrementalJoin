@@ -395,5 +395,14 @@ public class BPlusTree {
 
         return searchKeys;
     }
-
+    public Node leftMostNode() {
+        Node leftMostNode = this.root;
+        if (leftMostNode == null) {
+            throw new IllegalArgumentException("The root is null");
+        }
+        while (leftMostNode.getChildren().size() != 0) {
+            leftMostNode = leftMostNode.getChildren().get(0);
+        }
+        return leftMostNode;
+    }
 }
