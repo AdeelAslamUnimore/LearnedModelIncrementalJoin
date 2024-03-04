@@ -17,7 +17,7 @@ import java.util.concurrent.Future;
  * Consider the incremental sliding window size
  * Merge the BPlus tree mutable structure to immutable learned model depends on threshold
  */
-public class StreamJoin {
+public class StreamSelfJoin {
    // Tuple counter
     private int tupleCounter;
     // initilize the LinkedListBPlusTree
@@ -27,7 +27,7 @@ public class StreamJoin {
     /*
     Constructor to initialize the tuple counter
      */
-    public StreamJoin(){
+    public StreamSelfJoin(){
         this.tupleCounter=0;
         // LinkedList for mutable indexing data structure
         this.linkedListOfBPlusTree= new LinkedList<>();
@@ -82,7 +82,5 @@ public class StreamJoin {
 
 
     }
-    /**
-     * Searching
-     */
+
 }
