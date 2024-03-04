@@ -16,54 +16,6 @@ Merging is performed from the leaf node of the BPlusTree and create a learned mo
 Using Math.common fist compute the CDF and then train the model
  */
 public class MergingToLearnedModel {
-    final Object immutableLockWhileMergingFromBPlusTreeToLearnedModel = new Object();
-
-    /**
-     * Computes the empirical cumulative distribution function (CDF) Using Apache Common Math Libraryfor values stored in the given B+ tree.
-     * Constructs a DataAndRegressionModel object containing the computed CDF and a Simple Regression model.
-     *
-     * @param bPlusTree The B+ tree containing the values
-     * @param size      The size of the CDF array
-     * @return A DataAndRegressionModel object containing the computed CDF and Simple Regression model
-     */
-    public DataAndRegressionModel empericalCDF(BPlusTree bPlusTree, int size) {
-        double[] cdf = new double[size];
-        Key[] keys = new Key[size];
-        double[] values = new double[size];
-        int index = 0;
-        int keyIndex = 0;
-        Node node = bPlusTree.leftMostNode();
-
-        // Collect all values and keys from the B+ tree
-        while (node != null) {
-            for (int i = 0; i < node.getKeys().size(); i++) {
-                for (String value : node.getKeys().get(i).getValues()) {
-                    values[index] = node.getKeys().get(i).getKey();
-                    index++;
-                  //  double cumulativeProbability = Probability.normal(-Double.MAX_VALUE, Double.MAX_VALUE, value, true);
-                }
-                keys[keyIndex] = node.getKeys().get(i);
-                keyIndex++;
-            }
-            node = node.getNext();
-        }
-
-        // Load values into the empirical distribution
-        EmpiricalDistribution empiricalDistribution = new EmpiricalDistribution();
-        empiricalDistribution.load(values);
-
-        // Compute CDF and train Simple Regression model
-        SimpleRegression regression = new SimpleRegression();
-        for (int i = 0; i < values.length; i++) {
-            cdf[i] = empiricalDistribution.cumulativeProbability(values[i]);
-            System.out.println(values[i]+"=="+cdf[i]);
-            regression.addData(values[i], cdf[i]);
-        }
-
-        // Construct and return DataAndRegressionModel object
-        DataAndRegressionModel dataAndRegressionModel = new DataAndRegressionModel(keys, regression);
-        return dataAndRegressionModel;
-    }
     /**
      Emperical CDF computation using optimized method call.
      Train the model while iterating the leaf nodes of BPlusTree.

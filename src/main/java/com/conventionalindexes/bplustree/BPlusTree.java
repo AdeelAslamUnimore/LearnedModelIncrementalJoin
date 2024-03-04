@@ -20,6 +20,10 @@ public class BPlusTree {
     public BPlusTree() {
 
     }
+    public BPlusTree(int order) {
+        this.m = order;
+        this.root = null;
+    }
 
     /**
      * Initializes the B Plus Tree. Sets the degree of the BPlus Tree as m
