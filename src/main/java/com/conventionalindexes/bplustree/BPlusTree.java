@@ -196,7 +196,7 @@ public class BPlusTree {
                 middle.getChildren().add(rightPart);
 
                 List<Node> childrenOfCurr = curr.getChildren();
-                List<Node> childrenOfRight = new ArrayList<>();
+                List<Node> childrenOfRight = new ArrayList();
 
                 int lastChildOfLeft = childrenOfCurr.size() - 1;
 
@@ -370,7 +370,7 @@ public class BPlusTree {
 
     public List<Key> search(double key1, double key2) {
         //System.out.println("Searching between keys " + key1 + ", " + key2);
-        List<Key> searchKeys = new ArrayList<>();
+        List<Key> searchKeys = new ArrayList();
         Node currNode = this.root;
         // Traverse to the corresponding external node that would 'should'
         // contain starting key (key1)

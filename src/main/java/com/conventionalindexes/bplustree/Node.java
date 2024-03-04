@@ -32,8 +32,8 @@ public class Node {
      * Instantiates a new node.
      */
     public Node() {
-        this.keys = new ArrayList<>();
-        this.children = new ArrayList<>();
+        this.keys = new ArrayList();
+        this.children = new ArrayList();
         this.prev = null;
         this.next = null;
     }

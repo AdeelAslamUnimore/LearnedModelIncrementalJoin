@@ -28,7 +28,7 @@ public class Key {
     public Key(double key, String value) {
         this.key = key;
         if (null == this.values) {
-            values = new ArrayList<>();
+            values = new ArrayList();
         }
         this.values.add(value);
     }
@@ -41,7 +41,7 @@ public class Key {
      */
     public Key(double key) {
         this.key = key;
-        this.values = new ArrayList<>();
+        this.values = new ArrayList();
     }
 
     /**
