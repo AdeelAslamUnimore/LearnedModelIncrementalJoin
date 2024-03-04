@@ -12,10 +12,10 @@ import java.util.List;
 public class Key {
 
     /** The key. */
-    double key;
+    int key;
 
     /** The list of values for the key. Set only for external nodes*/
-    List<String> values;
+    List<Integer> values;
 
     /**
      * Instantiates a new key and its value.
@@ -25,7 +25,7 @@ public class Key {
      * @param value
      *            the value
      */
-    public Key(double key, String value) {
+    public Key(int  key, int value) {
         this.key = key;
         if (null == this.values) {
             values = new ArrayList();
@@ -39,7 +39,7 @@ public class Key {
      * @param key
      *            the key
      */
-    public Key(double key) {
+    public Key(int key) {
         this.key = key;
         this.values = new ArrayList();
     }
@@ -49,7 +49,7 @@ public class Key {
      *
      * @return the key
      */
-    public double getKey() {
+    public int getKey() {
         return key;
     }
 
@@ -59,7 +59,7 @@ public class Key {
      * @param key
      *            the new key
      */
-    public void setKey(double key) {
+    public void setKey(int key) {
         this.key = key;
     }
 
@@ -68,7 +68,7 @@ public class Key {
      *
      * @return the values
      */
-    public List<String> getValues() {
+    public List<Integer> getValues() {
         return values;
     }
 
@@ -78,7 +78,7 @@ public class Key {
      * @param values
      *            the new values
      */
-    public void setValues(List<String> values) {
+    public void setValues(List<Integer> values) {
         this.values = values;
     }
 

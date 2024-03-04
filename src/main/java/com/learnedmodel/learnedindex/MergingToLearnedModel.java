@@ -16,13 +16,10 @@ Merging is performed from the leaf node of the BPlusTree and create a learned mo
 Using Math.common fist compute the CDF and then train the model
  */
 public class MergingToLearnedModel {
-    /*
-        compute the CDF
-        @param BPlusTree where leaf nodes are sorted from mutable tree
-     */
+    final Object immutableLockWhileMergingFromBPlusTreeToLearnedModel = new Object();
 
     /**
-     * Computes the empirical cumulative distribution function (CDF) for values stored in the given B+ tree.
+     * Computes the empirical cumulative distribution function (CDF) Using Apache Common Math Libraryfor values stored in the given B+ tree.
      * Constructs a DataAndRegressionModel object containing the computed CDF and a Simple Regression model.
      *
      * @param bPlusTree The B+ tree containing the values
@@ -67,57 +64,62 @@ public class MergingToLearnedModel {
         DataAndRegressionModel dataAndRegressionModel = new DataAndRegressionModel(keys, regression);
         return dataAndRegressionModel;
     }
-    /*
-    Emperical CDF computation using with optimized method call
-
-     */
-    public SimpleRegression empericalOptimizedCDF(BPlusTree bPlusTree, int size){
+    /**
+     Emperical CDF computation using optimized method call.
+     Train the model while iterating the leaf nodes of BPlusTree.
+     The return of the method is the Data and Regression Model.
+ */
+    public synchronized DataAndRegressionModel empericalOptimizedCDF(BPlusTree bPlusTree, int size){
         // Get the leftmost node of the B+ tree
         Node node = bPlusTree.leftMostNode();
 
         // Initialize a SimpleRegression object to calculate linear regression
         SimpleRegression regression = new SimpleRegression();
 
-        // Flag to indicate if it's the first index
-        int  index = 0;
+        // Index for maintaining the data array [Key: [Values]]
+        int index = 0;
 
         // Calculate the increment for cdf
         double increment = 1.0 / size;
 
         // Initialize cumulative distribution function (cdf) to 0.0
         double cdf = 0.0;
-        // All Keys
-        Key[] keys= new Key[size];
+
+        // Array to store all keys
+        Key[] keys = new Key[size];
 
         // Iterate through the nodes of the B+ tree
-        while (node != null){
+        while (node != null) {
             // Iterate through the keys of the current node
             for (int i = 0; i < node.getKeys().size(); i++) {
-                    if(node.getKeys().get(i).getValues().size() > 1){
-                        // Increment cdf and add data to regression for each repeating value
-                        double cdfValueForRepeated=cdf + increment;
-                        for(int j = 0; j < node.getKeys().get(i).getValues().size(); j++){
-                            cdf = cdf + increment;
-                            regression.addData(node.getKeys().get(i).getKey(), cdfValueForRepeated);
-                            System.out.println(node.getKeys().get(i).getKey()+"==="+cdfValueForRepeated);
-                        }
-                        keys[index]= node.getKeys().get(i);
-                        index++;
-                    }else{
-                        // Add it to the regression model
+                if(node.getKeys().get(i).getValues().size() > 1) {
+                    // Increment cdf and add data to regression for each repeating value
+                    double cdfValueForRepeated = cdf + increment;
+                    for (int j = 0; j < node.getKeys().get(i).getValues().size(); j++) {
                         cdf = cdf + increment;
-                        regression.addData(node.getKeys().get(i).getKey(), cdf);
-                        System.out.println(node.getKeys().get(i).getKey()+"==="+cdf);
-                        keys[index]= node.getKeys().get(i);
-                        index++;
+                        regression.addData(node.getKeys().get(i).getKey(), cdfValueForRepeated);
                     }
+                    // Store the key
+                    keys[index] = node.getKeys().get(i);
+                    index++;
+                } else {
+                    // Add single value to the regression model
+                    cdf = cdf + increment;
+                    regression.addData(node.getKeys().get(i).getKey(), cdf);
+                    // Store the key
+                    keys[index] = node.getKeys().get(i);
+                    index++;
                 }
-           // }
+            }
             // Move to the next node
             node = node.getNext();
         }
-        return regression;
+
+        // Construct DataAndRegressionModel object
+        DataAndRegressionModel dataAndRegressionModel = new DataAndRegressionModel(keys, regression);
+        return dataAndRegressionModel;
     }
+
 
 }
 

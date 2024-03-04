@@ -42,7 +42,7 @@ public class BPlusTree {
      * @param value
      *            the value to be inserted
      */
-    public void insert(double key, String value) {
+    public void insert(int key, int value) {
 
         // Case 1: Inserting to an Empty B Plus Tree
         if (null == this.root) {
@@ -90,7 +90,7 @@ public class BPlusTree {
      * @param node
      *            the node where the key value pair has to be inserted
      */
-    private void insertWithinExternalNode(double key, String value, Node node) {
+    private void insertWithinExternalNode(int key, int value, Node node) {
         // A binary search is executed to find the correct place where the node
         // is to be inserted
         int indexOfKey = binarySearchWithinInternalNode(key, node.getKeys());
@@ -334,8 +334,8 @@ public class BPlusTree {
      *            the key to be searched
      * @return the list of values for the key
      */
-    public List<String> search(double key) {
-        List<String> searchValues = null;
+    public List<Integer> search(int key) {
+        List<Integer> searchValues = null;
 
         Node curr = this.root;
         // Traverse to the corresponding external node that would 'should'
@@ -368,7 +368,7 @@ public class BPlusTree {
      * @return the list of key value pairs between the two keys
      */
 
-    public List<Key> search(double key1, double key2) {
+    public List<Key> search(int key1, int key2) {
         //System.out.println("Searching between keys " + key1 + ", " + key2);
         List<Key> searchKeys = new ArrayList();
         Node currNode = this.root;
