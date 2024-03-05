@@ -4,7 +4,10 @@ package com.conventionalindexes.bplustree;
  */
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class BPlusTree {
 
@@ -13,6 +16,8 @@ public class BPlusTree {
 
     /** The root of the B Plus Tree. */
     private Node root;
+    /** BitSet For band Join . */
+    private BitSet bitSetBandJoin;
 
     /**
      * Instantiates a new b plus tree.
@@ -23,6 +28,7 @@ public class BPlusTree {
     public BPlusTree(int order) {
         this.m = order;
         this.root = null;
+        this.bitSetBandJoin= new BitSet();
     }
 
     /**
@@ -46,7 +52,7 @@ public class BPlusTree {
      * @param value
      *            the value to be inserted
      */
-    public void insert(int key, int value) {
+    public synchronized void insert(int key, int value) {
 
         // Case 1: Inserting to an Empty B Plus Tree
         if (null == this.root) {
@@ -408,5 +414,96 @@ public class BPlusTree {
             leftMostNode = leftMostNode.getChildren().get(0);
         }
         return leftMostNode;
+    }
+/**
+ * Find greater than the specified key
+ */
+public BitSet greaterThenSpecificValue(int key) {
+    BitSet bitSet = new BitSet();
+    if (this.root == null) {
+        //throw new IllegalArgumentException("Root is NULL");
+        return null;
+    }
+
+    Node currNode = this.root;
+    while (currNode.getChildren().size() != 0) {
+        currNode = currNode.getChildren().get(binarySearchWithinInternalNode(key, currNode.getKeys()));
+    }
+    for (Key item : currNode.getKeys()) {
+        if (item.getKey() <= key) {
+            continue;
+        }
+        for (int i : item.getValues()) {
+            bitSet.set(i);
+        }
+    }
+    currNode = currNode.getNext();
+    while (currNode != null) {
+        for (Key item : currNode.getKeys()) {
+            for (int i : item.getValues()) {
+                bitSet.set(i);
+            }
+        }
+
+        currNode = currNode.getNext();
+    }
+    return bitSet;
+}
+    public synchronized void lesserThanBandJoin(int key,  int threshold){
+        bitSetBandJoin = new BitSet();
+        if (this.root == null) {
+            //throw new IllegalArgumentException("Root is NULL");
+            return;
+        }
+        //System.out.println(this.root.getKeys().size());
+        Node currNode = this.root;
+        while (currNode.getChildren().size() != 0) {
+            currNode = currNode.getChildren().get(binarySearchWithinInternalNode(key, currNode.getKeys()));
+        }
+
+        // Please introduce parallel threads here
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        Node finalCurrNode = currNode;
+        Node nodeLeftScan=currNode.getPrev();
+        executorService.submit(() -> rightScanForLesser(finalCurrNode, key, threshold));
+        executorService.submit(() -> leftScanForLesser(nodeLeftScan, key, threshold));
+        executorService.shutdown();
+
+    }
+    private void rightScanForLesser(Node node, int key, int threshold){
+        while(node!=null){
+            for(Key item:node.getKeys()){
+                if(Math.abs(key-item.getKey())<=threshold){
+
+                    set(item.getKey());
+                }
+                else {
+
+                    return;
+
+                }
+            }
+            node=node.getNext();
+        }
+    }
+    private void leftScanForLesser(Node node, int key, int threshold){
+        while(node!=null){
+            for(Key item:node.getKeys()){
+                if(Math.abs(key-item.getKey())<=threshold){
+                    // put in the bitset
+                    set(item.getKey());
+                }
+                else {
+
+                    return;
+                }
+            }
+            node=node.getPrev();
+        }
+    }
+    public void set(int key){
+        synchronized (this) {
+            bitSetBandJoin.set(key);
+        }
     }
 }
