@@ -418,11 +418,11 @@ public class BPlusTree {
 /**
  * Find greater than the specified key
  */
-public BitSet greaterThenSpecificValue(int key) {
-    BitSet bitSet = new BitSet();
+public synchronized void greaterThenSpecificValue(int key) {
+ //   BitSet bitSet = new BitSet();
     if (this.root == null) {
         //throw new IllegalArgumentException("Root is NULL");
-        return null;
+        return;
     }
 
     Node currNode = this.root;
@@ -433,21 +433,21 @@ public BitSet greaterThenSpecificValue(int key) {
         if (item.getKey() <= key) {
             continue;
         }
-        for (int i : item.getValues()) {
-            bitSet.set(i);
-        }
+//        for (int i : item.getValues()) {
+//            bitSet.set(i);
+//        }
     }
     currNode = currNode.getNext();
     while (currNode != null) {
         for (Key item : currNode.getKeys()) {
-            for (int i : item.getValues()) {
-                bitSet.set(i);
-            }
+//            for (int i : item.getValues()) {
+//                bitSet.set(i);
+//            }
         }
 
         currNode = currNode.getNext();
     }
-    return bitSet;
+   // return bitSet;
 }
     public synchronized void lesserThanBandJoin(int key,  int threshold){
         bitSetBandJoin = new BitSet();

@@ -50,10 +50,11 @@ public class MergingToLearnedModel {
                     for (int j = 0; j < node.getKeys().get(i).getValues().size(); j++) {
                         cdf = cdf + increment;
                         regression.addData(node.getKeys().get(i).getKey(), cdfValueForRepeated);
+                        keys[index] = node.getKeys().get(i);
+                        index++;
                     }
                     // Store the key
-                    keys[index] = node.getKeys().get(i);
-                    index++;
+
                 } else {
                     // Add single value to the regression model
                     cdf = cdf + increment;

@@ -38,29 +38,35 @@ public class StreamSelfJoin {
         this.dataAndRegressionModelLinkedList= new LinkedList<>();
         // Initialize the BPlusTree
         bPlusTree= new BPlusTree(Constants.ORDERFORBPLUSTREE);
-        this.linkedListOfBPlusTree.add(bPlusTree);
+        // For Testing
+
+//        for (int i=0;i<10;i++){
+//            BPlusTree bPlusTree1= new BPlusTree(Constants.ORDERFORBPLUSTREE);
+//            linkedListOfBPlusTree.add(bPlusTree1);
+//            DataAndRegressionModel dataAndRegressionModel= new DataAndRegressionModel(null, null);
+//            dataAndRegressionModelLinkedList.add(dataAndRegressionModel);
+//        }
     }
     /*
        Complete Join procedure, It include indexing data structure and learned model
     */
     public void streamInequalityJoinProcessing(int tuple){
-        // BPlus tree insertion
 
+        // Perform lookup operation over the existing data structure including mutable Indexing data structure and immutable learned model
+        lookupOperation(tuple);
+        // Perform insertion operation into
         bPlusTree.insert(tuple, tuple);
         tupleCounter.increment();
 
-        //Initiate a
-            lookupOperation(tuple);
+//        // Merging from mutable Indexing data Structure
 
-        // Merging from mutable Indexing data Structure
-
+        synchronized (this) {
             if (tupleCounter.getCount() >= Constants.MERGETHRESHOLD) {
                 // Initiate the merging process
                 mergeFromMutableToLearnedModel();
             }
-        }
-
-
+     }
+    }
 
     /**
      * Lookup operation that include number of threads equal to total number of data structure
@@ -69,53 +75,51 @@ public class StreamSelfJoin {
      * @param tuple
      */
     public void lookupOperation(int tuple){
-        // Size is total instance of data structures both mutable and immutable during merge
-              int totalSize = linkedListOfBPlusTree.size() +( dataAndRegressionModelLinkedList.size()+1);
-        CountDownLatch latch = new CountDownLatch(totalSize); // Create a countdown latch with the total number of tasks
-
-        ExecutorService executorService = Executors.newFixedThreadPool(totalSize); // Create a fixed thread pool depending on the total size
-
-// Current index structure
+        // Total number of threads that perform join
+        int totalSize = linkedListOfBPlusTree.size() + dataAndRegressionModelLinkedList.size() + 1;
+       // CountDownLatch latch = new CountDownLatch(totalSize);
+        ExecutorService executorService = Executors.newFixedThreadPool(totalSize);
+        // Task for current index structure
         executorService.submit(() -> {
-            // Ensure thread-safe access to bPlusTree
-            synchronized (bPlusTree) {
-                // Access bPlusTree safely
-                bPlusTree.greaterThenSpecificValue(tuple);
-            }
-            latch.countDown(); // Signal that this task has completed
+            bPlusTree.greaterThenSpecificValue(tuple);
         });
 
-// Parallel execution of indexing data structure
+// Tasks for linkedListOfBPlusTree
         for (BPlusTree bPlusTreeInLinkedList : linkedListOfBPlusTree) {
             executorService.submit(() -> {
-                // Ensure thread-safe access to bPlusTree
-                synchronized (bPlusTreeInLinkedList) {
-                    // Access bPlusTree safely
-                    bPlusTreeInLinkedList.greaterThenSpecificValue(tuple);
-                }
-                latch.countDown(); // Signal that this task has completed
+             // System.out.println("Linked list Thread==="+tupleCounter.getCount());
+                bPlusTreeInLinkedList.greaterThenSpecificValue(tuple);
+
             });
         }
 
-// Process DataAndRegressionModel linked list
+// Tasks for dataAndRegressionModelLinkedList
         for (DataAndRegressionModel model : dataAndRegressionModelLinkedList) {
             executorService.submit(() -> {
-                // Ensure thread-safe access to model
-                synchronized (model) {
-                    // Access model safely
+                try {
+                   // System.out.println("Data and Regression Model======"+tuple);
                     model.searGreaterThanSpecifiedKey(tuple);
+                    System.out.println("Data and Regression Model==="+tupleCounter.getCount()+"==="+tuple);
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                latch.countDown(); // Signal that this task has completed
+
+//               System.out.println("DataAndRegressionModel Bplus Tree   "+ tupleCounter.getCount());
+
             });
         }
 
         try {
-            latch.await(); // Wait until all tasks have completed
-            executorService.shutdown(); // Shut down the executor service after all tasks are done
-        } catch (InterruptedException e) {
+
+            executorService.shutdown();
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
+       // executorService.shutdown();
+       // System.exit(-1);
 
     }
     public void shutdownExecutor(ExecutorService executor ) {
@@ -125,7 +129,7 @@ public class StreamSelfJoin {
     /**
      * Merging From mutable indexing data structure to learned model
      */
-    public void mergeFromMutableToLearnedModel(){
+    public synchronized void mergeFromMutableToLearnedModel(){
         // Size of Tuples for Computing the Emperical CDF
         int sizeOfTuples=tupleCounter.getCount();
         // Re initialize the tuple counter.
@@ -140,6 +144,7 @@ public class StreamSelfJoin {
         // Define a task to be executed asynchronously
         Callable<DataAndRegressionModel> task = () -> {
             // Call your method here
+
             return new MergingToLearnedModel().empericalOptimizedCDF( this.linkedListOfBPlusTree.getLast(),sizeOfTuples);
         };
         // Submit the task for execution
@@ -154,6 +159,7 @@ public class StreamSelfJoin {
                 this.dataAndRegressionModelLinkedList.add(immutableLearnedIndex);
                 linkedListOfBPlusTree.removeLast();
                 mergeStart=true;
+                executorService.shutdown();
                 //System.out.println("Task completed: " + immutableLearnedIndex);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -162,6 +168,8 @@ public class StreamSelfJoin {
         // Shutdown the ExecutorService after use
         if(mergeStart==true) {
             executorService.shutdown();
+            System.out.println("Merged Completed");
+            mergeStart=false;
         }
     }
 

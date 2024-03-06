@@ -1,6 +1,6 @@
 package com.join.inputtuples;
 
-public class Counter {
+public  class Counter {
 
     private int count;
 
@@ -15,7 +15,7 @@ public class Counter {
     public synchronized int getCount() {
         return count;
     }
-    public void setCount(int count) {
+    public synchronized void setCount(int count) {
         this.count = count;
     }
 

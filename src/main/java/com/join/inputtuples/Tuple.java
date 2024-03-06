@@ -41,4 +41,8 @@ public class Tuple implements Comparable<Tuple> {
     public int getTuple() {
         return tuple;
     }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
 }

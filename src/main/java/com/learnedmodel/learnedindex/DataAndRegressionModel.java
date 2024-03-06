@@ -67,13 +67,32 @@ public class DataAndRegressionModel {
      * Search greater than Specific key
      * @param key
      */
-    public void searGreaterThanSpecifiedKey(int key){
+    public synchronized void searGreaterThanSpecifiedKey(int key){
         // Predicted by model
-        double predictedCDF= simpleRegression.predict((double)key);
+
+        double predictedCDF= simpleRegression.predict(key);
         // Get index by multiplying the CDF with that key
         int predictedPosition= (int) (predictedCDF*keys.length);
+        if(predictedPosition<0){
+            predictedPosition=0;
+        }
+        if(predictedPosition>=keys.length){
+            predictedPosition=keys.length-1;
+        }
         int index;
+        System.out.println(key+"====="+predictedCDF+"==="+ predictedPosition+"==="+keys.length);
+        try {
+            System.out.println(keys[predictedPosition].getKey() + "=====" + key);
+        }catch (Exception e){
+            System.out.println(e);
+            System.out.println(key+"====="+ predictedPosition+"==="+keys.length);
+//            for(Key keyN:keys){
+//                System.out.println(keyN);
+//            }
+            System.exit(-1);
+        }
         if (keys[predictedPosition].getKey() == key) {
+          //  System.out.println(predictedCDF+"=Equal="+keys.length+"Key=="+key);
             index = predictedPosition;
             // Iterating all tuples
             int counter=0;
@@ -81,12 +100,14 @@ public class DataAndRegressionModel {
                 counter++;
             }
         } else if (keys[predictedPosition].getKey() < key) {
+          //  System.out.println(predictedCDF+"=Less="+keys.length+"Key=="+key);
             index = binarySearch(keys, 0, predictedPosition, key);
             int counter=0;
             for(int i=index;i<keys.length;i++){
                 counter++;
             }
         } else {
+          //  System.out.println(predictedCDF+"=Great="+keys.length+"Key=="+key);
             index = binarySearch(keys, predictedPosition, keys.length - 1, key);
             int counter=0;
             for(int i=index;i<keys.length;i++){
