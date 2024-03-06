@@ -16,6 +16,11 @@ public class Key {
 
     /** The list of values for the key. Set only for external nodes*/
     List<Integer> values;
+    /** Single payload */
+     int payLoad;
+
+    /** Constructor to initiate a single object */
+
 
     /**
      * Instantiates a new key and its value.

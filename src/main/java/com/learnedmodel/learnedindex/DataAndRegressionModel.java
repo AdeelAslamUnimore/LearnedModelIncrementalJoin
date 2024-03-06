@@ -80,7 +80,7 @@ public class DataAndRegressionModel {
             predictedPosition=keys.length-1;
         }
         int index;
-        System.out.println(key+"====="+predictedCDF+"==="+ predictedPosition+"==="+keys.length);
+        System.out.println("key=="+key+"predictedCDF=="+ predictedCDF+"==="+ predictedPosition+"==="+keys.length);
         try {
             System.out.println(keys[predictedPosition].getKey() + "=====" + key);
         }catch (Exception e){

@@ -31,47 +31,47 @@ public class MergingToLearnedModel {
         // Index for maintaining the data array [Key: [Values]]
         int index = 0;
 
-        // Calculate the increment for cdf
-        double increment = 1.0 / size;
-
         // Initialize cumulative distribution function (cdf) to 0.0
-        double cdf = 0.0;
 
-        // Array to store all keys
-        Key[] keys = new Key[size];
 
-        // Iterate through the nodes of the B+ tree
+    // Array to store all keys
+    Key[] keys = new Key[size];
+
+    // Iterate through the nodes of the B+ tree
         while (node != null) {
-            // Iterate through the keys of the current node
-            for (int i = 0; i < node.getKeys().size(); i++) {
-                if(node.getKeys().get(i).getValues().size() > 1) {
-                    // Increment cdf and add data to regression for each repeating value
-                    double cdfValueForRepeated = cdf + increment;
-                    for (int j = 0; j < node.getKeys().get(i).getValues().size(); j++) {
-                        cdf = cdf + increment;
-                        regression.addData(node.getKeys().get(i).getKey(), cdfValueForRepeated);
-                        keys[index] = node.getKeys().get(i);
-                        index++;
-                    }
-                    // Store the key
-
-                } else {
-                    // Add single value to the regression model
-                    cdf = cdf + increment;
+        // Iterate through the keys of the current node
+        for (int i = 0; i < node.getKeys().size(); i++) {
+            if(node.getKeys().get(i).getValues().size() > 1) {
+                // Increment cdf and add data to regression for each repeating value
+                int repeatingSize=node.getKeys().get(i).getValues().size();
+                double cdf = (double) (index + repeatingSize) / size;
+                 System.out.println(cdf);
+                for (int j = 0; j < node.getKeys().get(i).getValues().size(); j++) {
+                   // cdf = cdf + increment;
                     regression.addData(node.getKeys().get(i).getKey(), cdf);
-                    // Store the key
-                    keys[index] = node.getKeys().get(i);
+                    keys[index] = new Key(node.getKeys().get(i).getKey(),node.getKeys().get(i).getValues().get(j));
                     index++;
                 }
-            }
-            // Move to the next node
-            node = node.getNext();
-        }
+                // Store the key
 
-        // Construct DataAndRegressionModel object
-        DataAndRegressionModel dataAndRegressionModel = new DataAndRegressionModel(keys, regression);
-        return dataAndRegressionModel;
+            } else {
+                // Add single value to the regression model
+                 double cdf = (double) (index + 1) / size;
+                 System.out.println(cdf);
+                regression.addData(node.getKeys().get(i).getKey(), cdf);
+                // Store the key
+                keys[index] =new Key(node.getKeys().get(i).getKey(),node.getKeys().get(i).getValues().get(0));
+                index++;
+            }
+        }
+        // Move to the next node
+        node = node.getNext();
     }
+
+    // Construct DataAndRegressionModel object
+    DataAndRegressionModel dataAndRegressionModel = new DataAndRegressionModel(keys, regression);
+        return dataAndRegressionModel;
+}
 
 
 }
